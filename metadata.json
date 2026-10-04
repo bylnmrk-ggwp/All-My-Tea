@@ -1,0 +1,6 @@
+{
+  "name": "All My Tea - POS & Inventory System",
+  "description": "Store Point of Sale, Kitchen Display, and Customer Menu for AllmyTea Burger & Milktea in 105 Yanga St., Maysilo, Malabon City.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
