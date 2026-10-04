@@ -263,3 +263,16 @@ Deleted: the 17 files in section 10, `AllMyTeaHeader.tsx`, three old JPGs.
 - All store data still lives in the shop tablet's `localStorage`. Clearing browser data wipes orders and stock. A backend is a separate project.
 - SPA fallback must be configured on the production host.
 - `.env.example` and `metadata.json` are AI Studio scaffold files that mention `GEMINI_API_KEY`; nothing reads them. Left untouched; removable in a later cleanup.
+
+## 14. Verification (2026-10-04, branch `redesign`)
+
+Automated, all passing at the final commit:
+
+- `npm run lint` (tsc) clean; `npm test` 27/27 (routing, store hours, Messenger message, token file); `npm run build` succeeds.
+- `dist/assets` contains exactly one `.jpg` (the logo); `dist/favicon.jpg` and `dist/og-image.jpg` present.
+- `vite preview`: `/`, `/staff/pos`, `/staff/kds`, `/staff/inventory`, `/staff/orders`, `/staff/analytics`, `/nope` all return 200 (SPA fallback works under preview).
+- `grep Diffun src` returns nothing; no `amber-`, `neutral-`, `emerald-`, `rose-` utility classes remain in `src`.
+
+Deferred to the owner (no browser automation was available in the build session): the manual walk in section 11, items 4–6 — PIN entry and refresh on `/staff/kds`, the Messenger hand-off opening `m.me/AllMyTeaBurgerMilktea` with the order text on the clipboard, the 375 px layout with the sticky cart bar, and keyboard focus rings. Dev server: `npm run dev`, then `http://localhost:3000`.
+
+Still open: set `og:image` to an absolute URL once the production domain exists; configure SPA fallback on the host.
