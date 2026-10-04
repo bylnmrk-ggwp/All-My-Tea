@@ -413,7 +413,7 @@ export const INITIAL_INGREDIENTS: StoreIngredient[] = [
     unit: 'patties',
     reorderThreshold: 25,
     costPerUnit: 28,
-    supplier: 'Diffun Meat Market Butchery',
+    supplier: 'Malabon Public Market',
     lastRestocked: '2026-10-03T07:30:00Z',
   },
   {
@@ -435,7 +435,7 @@ export const INITIAL_INGREDIENTS: StoreIngredient[] = [
     unit: 'slices',
     reorderThreshold: 40,
     costPerUnit: 6,
-    supplier: 'Diffun Grocery Mart',
+    supplier: 'Malabon Grocery',
     lastRestocked: '2026-10-01T15:00:00Z',
   },
   {
@@ -457,7 +457,7 @@ export const INITIAL_INGREDIENTS: StoreIngredient[] = [
     unit: 'slices',
     reorderThreshold: 20,
     costPerUnit: 22,
-    supplier: 'Diffun Meat Market Butchery',
+    supplier: 'Malabon Public Market',
     lastRestocked: '2026-10-03T08:00:00Z',
   },
   {
@@ -468,7 +468,7 @@ export const INITIAL_INGREDIENTS: StoreIngredient[] = [
     unit: 'packs',
     reorderThreshold: 8,
     costPerUnit: 75,
-    supplier: 'Diffun Asian Supply',
+    supplier: 'Asian Supply, Malabon',
     lastRestocked: '2026-10-02T10:00:00Z',
   },
   {
@@ -479,7 +479,7 @@ export const INITIAL_INGREDIENTS: StoreIngredient[] = [
     unit: 'kg',
     reorderThreshold: 5,
     costPerUnit: 90,
-    supplier: 'Diffun Asian Supply',
+    supplier: 'Asian Supply, Malabon',
     lastRestocked: '2026-10-02T10:00:00Z',
   },
   {
@@ -580,7 +580,7 @@ export const INITIAL_ORDERS: Order[] = [
     type: 'delivery',
     customerName: 'Jasmine Tolentino',
     customerPhone: '0917-322-9229',
-    deliveryAddress: 'Purok 3, Near Diffun Central School, Andres Bonifacio',
+    deliveryAddress: 'Block 3, Maysilo, Malabon City',
     items: [
       {
         cartItemId: 'c-4',
