@@ -1,56 +1,61 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 9%;
-    --radius: 0.375rem;
-  }
+@theme {
+  /* Brand, taken from the Facebook logo */
+  --color-brand-500: #F2B64B;
+  --color-brand-700: #C98A2E;
+  --color-brown-700: #7A3E12;
+  --color-brown-900: #2B1B10;
+  --color-cream-50: #FFF8EC;
 
-  .dark {
-    --background: 0 0% 9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+  /* Warm neutrals for the staff portal (override Tailwind's cool stone) */
+  --color-stone-100: #F4F2EE;
+  --color-stone-200: #ECE8E1;
+  --color-stone-300: #E4DFD6;
+  --color-stone-500: #8A8178;
+  --color-stone-700: #5C544D;
+
+  /* Order and stock status */
+  --color-status-pending: #F2B64B;
+  --color-status-preparing: #2563EB;
+  --color-status-ready: #15803D;
+  --color-status-danger: #B91C1C;
+
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --radius-panel: 10px;
+  --radius-control: 6px;
+}
+
+@layer base {
+  html {
+    font-variant-numeric: tabular-nums;
   }
 
   body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    @apply bg-white text-brown-900 font-sans antialiased;
+  }
+
+  .font-display {
+    font-variation-settings: 'SOFT' 80, 'opsz' 72;
+    letter-spacing: -0.02em;
   }
 }
 
-.font-mono {
-  font-family: 'JetBrains Mono', monospace;
+/* Single landing-page load moment: the hero logo disc settles into place. */
+@keyframes hero-enter {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.hero-enter {
+  animation: hero-enter 400ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-enter {
+    animation: none;
+  }
 }

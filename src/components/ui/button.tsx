@@ -4,26 +4,23 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/src/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-neutral-950 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-control text-sm font-semibold transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brown-700 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default:
-          "bg-neutral-900 text-neutral-50 shadow-xs hover:bg-neutral-900/90 active:bg-neutral-950",
-        destructive:
-          "bg-red-600 text-neutral-50 shadow-xs hover:bg-red-600/90 active:bg-red-700",
-        outline:
-          "border border-neutral-300 bg-white shadow-xs hover:bg-neutral-100 hover:text-neutral-900 text-neutral-800",
-        secondary:
-          "bg-neutral-100 text-neutral-900 shadow-xs hover:bg-neutral-100/80",
-        ghost: "hover:bg-neutral-100 hover:text-neutral-900 text-neutral-700",
-        link: "text-neutral-900 underline-offset-4 hover:underline",
+        default: "bg-brown-700 text-white hover:bg-brown-900 active:bg-brown-900",
+        brand: "bg-brand-500 text-brown-900 hover:bg-brand-700 active:bg-brand-700",
+        destructive: "bg-status-danger text-white hover:bg-red-800 active:bg-red-900",
+        outline: "border border-stone-300 bg-white text-brown-900 hover:bg-stone-100",
+        secondary: "bg-stone-100 text-brown-900 hover:bg-stone-200",
+        ghost: "text-stone-700 hover:bg-stone-100 hover:text-brown-900",
+        link: "text-brown-700 underline-offset-4 hover:underline",
       },
       size: {
         default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8",
-        icon: "h-8 w-8",
+        sm: "h-8 px-3 text-xs",
+        lg: "h-11 px-6 text-base",
+        icon: "h-9 w-9",
       },
     },
     defaultVariants: {

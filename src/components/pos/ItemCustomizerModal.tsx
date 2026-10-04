@@ -118,11 +118,6 @@ export const ItemCustomizerModal: React.FC<ItemCustomizerModalProps> = ({
     <Dialog open={!!item} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-xs text-amber-800 font-semibold">{item.code}</span>
-            <span className="text-xs text-neutral-400">·</span>
-            <span className="text-xs text-neutral-500">{item.category}</span>
-          </div>
           <DialogTitle className="text-lg">{item.name}</DialogTitle>
           <DialogDescription>{item.description}</DialogDescription>
         </DialogHeader>
@@ -131,50 +126,50 @@ export const ItemCustomizerModal: React.FC<ItemCustomizerModalProps> = ({
           {/* Drink Size Selector */}
           {isDrink && (
             <div>
-              <Label className="block mb-1.5 font-semibold text-neutral-800">Cup Size</Label>
+              <Label className="block mb-1.5">Size</Label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setSize('16oz')}
-                  className={`p-2.5 rounded-md border text-xs font-medium flex items-center justify-between transition-colors ${
+                  className={`p-2.5 rounded-control border text-xs font-medium flex items-center justify-between transition-colors ${
                     size === '16oz'
-                      ? 'border-neutral-900 bg-neutral-900 text-white'
-                      : 'border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-800'
+                      ? 'border-brown-700 bg-brown-700 text-white'
+                      : 'border-stone-300 bg-white hover:bg-stone-100 text-brown-900'
                   }`}
                 >
                   <span>Medium (16oz)</span>
-                  <span className="font-mono tabular-nums">₱{item.basePrice}</span>
+                  <span className="">₱{item.basePrice}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setSize('22oz')}
-                  className={`p-2.5 rounded-md border text-xs font-medium flex items-center justify-between transition-colors ${
+                  className={`p-2.5 rounded-control border text-xs font-medium flex items-center justify-between transition-colors ${
                     size === '22oz'
-                      ? 'border-neutral-900 bg-neutral-900 text-white'
-                      : 'border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-800'
+                      ? 'border-brown-700 bg-brown-700 text-white'
+                      : 'border-stone-300 bg-white hover:bg-stone-100 text-brown-900'
                   }`}
                 >
                   <span>Large (22oz)</span>
-                  <span className="font-mono tabular-nums">₱{item.basePrice + 20}</span>
+                  <span className="">₱{item.basePrice + 20}</span>
                 </button>
               </div>
             </div>
           )}
 
-          {/* Sugar Level */}
+          {/* Sugar */}
           {isDrink && item.allowSugarIce && (
             <div>
-              <Label className="block mb-1.5 font-semibold text-neutral-800">Sugar Level</Label>
+              <Label className="block mb-1.5">Sugar Level</Label>
               <div className="grid grid-cols-5 gap-1.5">
                 {(['0%', '25%', '50%', '75%', '100%'] as const).map((lvl) => (
                   <button
                     key={lvl}
                     type="button"
                     onClick={() => setSugarLevel(lvl)}
-                    className={`py-1.5 text-xs rounded border transition-colors ${
+                    className={`py-1.5 text-xs rounded-control border transition-colors ${
                       sugarLevel === lvl
-                        ? 'bg-amber-800 border-amber-800 text-white font-semibold'
-                        : 'border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50'
+                        ? 'bg-brown-700 border-brown-700 text-white font-semibold'
+                        : 'border-stone-300 bg-white text-brown-900 hover:bg-stone-100'
                     }`}
                   >
                     {lvl}
@@ -187,17 +182,17 @@ export const ItemCustomizerModal: React.FC<ItemCustomizerModalProps> = ({
           {/* Ice Level */}
           {isDrink && item.allowSugarIce && (
             <div>
-              <Label className="block mb-1.5 font-semibold text-neutral-800">Ice Preference</Label>
+              <Label className="block mb-1.5">Ice</Label>
               <div className="grid grid-cols-3 gap-2">
                 {(['No Ice', 'Less Ice', 'Regular Ice'] as const).map((lvl) => (
                   <button
                     key={lvl}
                     type="button"
                     onClick={() => setIceLevel(lvl)}
-                    className={`py-1.5 text-xs rounded border transition-colors ${
+                    className={`py-1.5 text-xs rounded-control border transition-colors ${
                       iceLevel === lvl
-                        ? 'bg-amber-800 border-amber-800 text-white font-semibold'
-                        : 'border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50'
+                        ? 'bg-brown-700 border-brown-700 text-white font-semibold'
+                        : 'border-stone-300 bg-white text-brown-900 hover:bg-stone-100'
                     }`}
                   >
                     {lvl}
@@ -210,17 +205,17 @@ export const ItemCustomizerModal: React.FC<ItemCustomizerModalProps> = ({
           {/* Ramen Spiciness */}
           {isRamen && (
             <div>
-              <Label className="block mb-1.5 font-semibold text-neutral-800">Broth Spice Level</Label>
+              <Label className="block mb-1.5">Spice</Label>
               <div className="grid grid-cols-3 gap-2">
                 {(['Mild', 'Medium', 'Extra Spicy'] as const).map((lvl) => (
                   <button
                     key={lvl}
                     type="button"
                     onClick={() => setSpiciness(lvl)}
-                    className={`py-2 text-xs rounded border transition-colors ${
+                    className={`py-2 text-xs rounded-control border transition-colors ${
                       spiciness === lvl
-                        ? 'bg-rose-700 border-rose-700 text-white font-semibold'
-                        : 'border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50'
+                        ? 'bg-brown-700 border-brown-700 text-white font-semibold'
+                        : 'border-stone-300 bg-white text-brown-900 hover:bg-stone-100'
                     }`}
                   >
                     {lvl}
@@ -233,14 +228,14 @@ export const ItemCustomizerModal: React.FC<ItemCustomizerModalProps> = ({
           {/* Add-ons */}
           {(isDrink || isBurger || isRamen || isSushi) && (
             <div>
-              <Label className="block mb-1.5 font-semibold text-neutral-800">
+              <Label className="block mb-1.5">
                 {isDrink
-                  ? 'Drink Toppings & Add-ons'
+                  ? 'Toppings and add-ons'
                   : isBurger
-                  ? 'Burger Add-ons'
+                  ? 'Add-ons'
                   : isRamen
-                  ? 'Ramen Toppings'
-                  : 'Sushi Extras'}
+                  ? 'Toppings'
+                  : 'Extras'}
               </Label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {(isDrink
@@ -257,25 +252,25 @@ export const ItemCustomizerModal: React.FC<ItemCustomizerModalProps> = ({
                       key={addon.name}
                       type="button"
                       onClick={() => toggleAddon(addon)}
-                      className={`p-2 rounded-md border text-xs flex items-center justify-between transition-colors ${
+                      className={`p-2 rounded-control border text-xs flex items-center justify-between transition-colors ${
                         isSelected
-                          ? 'border-amber-700 bg-amber-50/80 text-amber-950 font-medium'
-                          : 'border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700'
+                          ? 'border-brown-700 bg-brand-500/20 text-brown-900 font-medium'
+                          : 'border-stone-300 bg-white hover:bg-stone-100 text-brown-900'
                       }`}
                     >
                       <div className="flex items-center gap-1.5">
                         <span
-                          className={`w-3.5 h-3.5 rounded border flex items-center justify-center text-[10px] ${
+                          className={`w-3.5 h-3.5 rounded-control border flex items-center justify-center text-[10px] ${
                             isSelected
-                              ? 'bg-amber-700 border-amber-700 text-white'
-                              : 'border-neutral-300'
+                              ? 'bg-brown-700 border-brown-700 text-white'
+                              : 'border-stone-300'
                           }`}
                         >
                           {isSelected && <Check className="w-2.5 h-2.5" />}
                         </span>
                         <span>{addon.name}</span>
                       </div>
-                      <span className="font-mono tabular-nums text-neutral-500">
+                      <span className=" text-stone-500">
                         +₱{addon.price}
                       </span>
                     </button>
@@ -287,20 +282,20 @@ export const ItemCustomizerModal: React.FC<ItemCustomizerModalProps> = ({
 
           {/* Special Instructions */}
           <div>
-            <Label htmlFor="special-inst" className="block mb-1">Kitchen Notes / Special Requests</Label>
+            <Label htmlFor="special-inst" className="block mb-1">Special instructions</Label>
             <input
               id="special-inst"
               type="text"
               value={specialInstructions}
               onChange={(e) => setSpecialInstructions(e.target.value)}
-              placeholder="e.g. Separate chili oil, extra napkins, cut in half"
-              className="w-full h-8 px-2.5 text-xs border border-neutral-300 rounded-md focus:outline-hidden focus:ring-1 focus:ring-neutral-900"
+              placeholder="Separate chili oil, extra napkins, cut in half"
+              className="w-full h-9 px-3 text-[13px] border border-stone-300 rounded-control bg-white focus:outline-hidden focus:ring-2 focus:ring-brown-700"
             />
           </div>
 
           {/* Quantity Row */}
-          <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-md border border-neutral-200">
-            <span className="text-xs font-semibold text-neutral-800">Quantity</span>
+          <div className="flex items-center justify-between p-3 bg-stone-100 rounded-control border border-stone-300">
+            <span className="text-xs font-semibold text-brown-900">Quantity</span>
             <div className="flex items-center gap-3">
               <Button
                 type="button"
@@ -311,7 +306,7 @@ export const ItemCustomizerModal: React.FC<ItemCustomizerModalProps> = ({
               >
                 <Minus className="w-3.5 h-3.5" />
               </Button>
-              <span className="font-mono font-bold text-sm tabular-nums w-6 text-center">
+              <span className="font-mono font-bold text-sm w-6 text-center">
                 {quantity}
               </span>
               <Button
@@ -327,10 +322,10 @@ export const ItemCustomizerModal: React.FC<ItemCustomizerModalProps> = ({
           </div>
         </div>
 
-        <DialogFooter className="pt-2 flex items-center justify-between sm:justify-between w-full border-t border-neutral-200">
+        <DialogFooter className="pt-2 flex items-center justify-between sm:justify-between w-full border-t border-stone-300">
           <div>
-            <span className="text-[11px] text-neutral-500 block">Item Subtotal</span>
-            <span className="text-lg font-bold font-mono text-neutral-900 tabular-nums">
+            <span className="text-[11px] text-stone-500 block">Subtotal</span>
+            <span className="text-lg font-bold font-mono text-brown-900">
               ₱{subtotal.toLocaleString()}
             </span>
           </div>
@@ -343,9 +338,8 @@ export const ItemCustomizerModal: React.FC<ItemCustomizerModalProps> = ({
               type="button"
               size="sm"
               onClick={handleConfirm}
-              className="bg-amber-800 hover:bg-amber-900 text-white"
             >
-              Add to Order (₱{subtotal})
+              Add to order, ₱{subtotal.toLocaleString()}
             </Button>
           </div>
         </DialogFooter>
