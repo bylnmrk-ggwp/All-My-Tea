@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { AppTab, MenuItem, StoreIngredient, Order, StockMovement, OrderStatus } from './types/allmytea';
+import { MenuItem, StoreIngredient, Order, StockMovement, OrderStatus } from './types/allmytea';
 import {
-  loadMenuItems,
-  saveMenuItems,
-  loadIngredients,
-  saveIngredients,
-  loadOrders,
-  saveOrders,
-  loadMovements,
-  saveMovements,
-  resetStoreData,
+  loadMenuItems, saveMenuItems, loadIngredients, saveIngredients,
+  loadOrders, saveOrders, loadMovements, saveMovements, resetStoreData,
 } from './utils/allMyTeaStorage';
 import { STORE_INFO } from './data/allMyTeaData';
-import { AllMyTeaHeader } from './components/AllMyTeaHeader';
+import { useRoute } from './hooks/useRoute';
+import { StaffHeader } from './components/staff/StaffHeader';
+import { PinGate, isStaffUnlocked, lockStaff } from './components/staff/PinGate';
 import { CustomerLandingPage } from './components/customer/CustomerLandingPage';
 import { PosView } from './components/pos/PosView';
 import { KitchenDisplayView } from './components/kds/KitchenDisplayView';
@@ -22,12 +17,13 @@ import { SalesAnalyticsView } from './components/analytics/SalesAnalyticsView';
 import { Check } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<AppTab>('landing');
+  const [route, navigate] = useRoute();
+  const [unlocked, setUnlocked] = useState(isStaffUnlocked);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [ingredients, setIngredients] = useState<StoreIngredient[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [movements, setMovements] = useState<StockMovement[]>([]);
-  const [cashierName, setCashierName] = useState('Maria Santos');
+  const [cashierName] = useState('Maria Santos');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -193,76 +189,63 @@ export default function App() {
     showToast(`Added "${newIng.name}" to store inventory`);
   };
 
-  // Reset to default demo data
   const handleResetData = () => {
-    if (window.confirm('Reset AllmyTea demo data to default sample catalog and tickets?')) {
-      const reset = resetStoreData();
-      setMenuItems(reset.menu);
-      setIngredients(reset.ingredients);
-      setOrders(reset.orders);
-      setMovements(reset.movements);
-      showToast('Store catalog & orders restored to default!');
-    }
+    const reset = resetStoreData();
+    setMenuItems(reset.menu);
+    setIngredients(reset.ingredients);
+    setOrders(reset.orders);
+    setMovements(reset.movements);
+    showToast('Demo data reset');
+  };
+
+  const handleSignOut = () => {
+    lockStaff();
+    setUnlocked(false);
+    navigate({ kind: 'landing' });
   };
 
   const pendingOrdersCount = orders.filter((o) => o.status === 'pending' || o.status === 'preparing').length;
   const lowIngredientsCount = ingredients.filter((i) => i.stock <= i.reorderThreshold).length;
 
-  // If in customer landing mode
-  if (activeTab === 'landing') {
+  const toast = toastMessage && (
+    <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-control bg-brown-900 px-4 py-2.5 text-[13px] font-semibold text-white shadow-lg">
+      <Check className="h-4 w-4 shrink-0 text-green-400" />
+      <span>{toastMessage}</span>
+    </div>
+  );
+
+  if (route.kind === 'landing') {
     return (
       <>
-        <CustomerLandingPage
-          menuItems={menuItems}
-          onPlaceCustomerOrder={handleOrderCreated}
-          onOpenStaffPortal={() => setActiveTab('pos')}
-        />
-
-        {/* Floating Toast Notification */}
-        {toastMessage && (
-          <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white text-xs font-semibold rounded-md shadow-lg transition-transform animate-in fade-in slide-in-from-bottom-2">
-            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>{toastMessage}</span>
-          </div>
-        )}
+        <CustomerLandingPage menuItems={menuItems} onOpenStaff={() => navigate({ kind: 'staff', tab: 'pos' })} />
+        {toast}
       </>
     );
   }
 
-  // Staff Portals (POS, KDS, Inventory, Orders, Analytics)
+  if (!unlocked) {
+    return <PinGate onUnlock={() => setUnlocked(true)} />;
+  }
+
+  const tab = route.tab;
+
   return (
-    <div className="min-h-screen bg-neutral-50 text-neutral-900 flex flex-col antialiased">
-      {/* Brand Header & Tabs */}
-      <AllMyTeaHeader
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        pendingOrdersCount={pendingOrdersCount}
-        lowIngredientsCount={lowIngredientsCount}
-        onResetData={handleResetData}
+    <div className="flex min-h-screen flex-col bg-stone-100 text-brown-900">
+      <StaffHeader
+        tab={tab}
+        onNavigate={(next) => navigate({ kind: 'staff', tab: next })}
+        onGoHome={() => navigate({ kind: 'landing' })}
+        pendingCount={pendingOrdersCount}
+        lowStockCount={lowIngredientsCount}
         cashierName={cashierName}
+        onReset={handleResetData}
+        onSignOut={handleSignOut}
       />
 
-      {/* Main View Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Tab 1: POS Cashier Register */}
-        {activeTab === 'pos' && (
-          <PosView
-            menuItems={menuItems}
-            cashierName={cashierName}
-            onOrderCreated={handleOrderCreated}
-          />
-        )}
-
-        {/* Tab 2: Kitchen Display System (KDS) */}
-        {activeTab === 'kds' && (
-          <KitchenDisplayView
-            orders={orders}
-            onUpdateOrderStatus={handleUpdateOrderStatus}
-          />
-        )}
-
-        {/* Tab 3: Store Stocks & Raw Ingredients */}
-        {activeTab === 'inventory' && (
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        {tab === 'pos' && <PosView menuItems={menuItems} cashierName={cashierName} onOrderCreated={handleOrderCreated} />}
+        {tab === 'kds' && <KitchenDisplayView orders={orders} onUpdateOrderStatus={handleUpdateOrderStatus} />}
+        {tab === 'inventory' && (
           <StoreInventoryView
             ingredients={ingredients}
             movements={movements}
@@ -270,48 +253,17 @@ export default function App() {
             onAddIngredient={handleAddIngredient}
           />
         )}
-
-        {/* Tab 4: Past Orders History & Receipts */}
-        {activeTab === 'orders' && (
-          <OrderHistoryView orders={orders} />
-        )}
-
-        {/* Tab 5: Daily Sales & Analytics */}
-        {activeTab === 'analytics' && (
-          <SalesAnalyticsView orders={orders} />
-        )}
+        {tab === 'orders' && <OrderHistoryView orders={orders} />}
+        {tab === 'analytics' && <SalesAnalyticsView orders={orders} />}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-neutral-200 bg-white py-4 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-2">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-neutral-800">{STORE_INFO.name}</span>
-            <span>·</span>
-            <span>{STORE_INFO.address}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span>Hours: {STORE_INFO.operatingHours}</span>
-            <span>·</span>
-            <span>Contact: {STORE_INFO.contact}</span>
-            <span>·</span>
-            <button
-              onClick={() => setActiveTab('landing')}
-              className="font-semibold text-amber-800 hover:underline"
-            >
-              Customer Landing Page →
-            </button>
-          </div>
-        </div>
+      <footer className="border-t border-stone-300 bg-white py-3">
+        <p className="mx-auto max-w-7xl px-4 text-[12px] text-stone-500 sm:px-6 lg:px-8">
+          {STORE_INFO.name}, {STORE_INFO.address}. Open {STORE_INFO.operatingHours}.
+        </p>
       </footer>
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white text-xs font-semibold rounded-md shadow-lg transition-transform animate-in fade-in slide-in-from-bottom-2">
-          <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
+      {toast}
     </div>
   );
 }

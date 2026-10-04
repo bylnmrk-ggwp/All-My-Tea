@@ -91,4 +91,3 @@ export interface StockMovement {
   recordedBy: string;
 }
 
-export type AppTab = 'landing' | 'pos' | 'kds' | 'inventory' | 'orders' | 'analytics';

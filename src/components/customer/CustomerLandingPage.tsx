@@ -35,8 +35,7 @@ import {
 
 interface CustomerLandingPageProps {
   menuItems: MenuItem[];
-  onPlaceCustomerOrder: (order: Order) => void;
-  onOpenStaffPortal: () => void;
+  onOpenStaff: () => void;
 }
 
 const CATEGORIES: MenuCategory[] = [
@@ -51,8 +50,7 @@ const CATEGORIES: MenuCategory[] = [
 
 export const CustomerLandingPage: React.FC<CustomerLandingPageProps> = ({
   menuItems,
-  onPlaceCustomerOrder,
-  onOpenStaffPortal,
+  onOpenStaff,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<MenuCategory>('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -160,8 +158,6 @@ export const CustomerLandingPage: React.FC<CustomerLandingPageProps> = ({
       timestamp: new Date().toISOString(),
       cashier: 'Online Customer Order',
     };
-
-    onPlaceCustomerOrder(newOrder);
     setOrderConfirmed(newOrder);
     setCustomerCart([]);
     setIsCheckoutModalOpen(false);
@@ -243,7 +239,7 @@ export const CustomerLandingPage: React.FC<CustomerLandingPageProps> = ({
 
             <Button
               size="sm"
-              onClick={onOpenStaffPortal}
+              onClick={onOpenStaff}
               className="bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold"
             >
               Staff POS
@@ -632,7 +628,7 @@ export const CustomerLandingPage: React.FC<CustomerLandingPageProps> = ({
               Facebook: @AllMyTeaBurgerMilktea
             </a>
             <button
-              onClick={onOpenStaffPortal}
+              onClick={onOpenStaff}
               className="px-3 py-1 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded border border-neutral-700 text-[11px]"
             >
               Staff Portal
