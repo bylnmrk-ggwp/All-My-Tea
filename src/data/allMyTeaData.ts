@@ -1,4 +1,5 @@
 import { MenuItem, StoreIngredient, Order } from '../types/allmytea';
+import type { DaySchedule } from '../lib/storeHours';
 
 export const STORE_INFO = {
   name: 'AllmyTea',
@@ -16,9 +17,10 @@ export const STORE_INFO = {
     { day: 'Friday', hours: '4:00 PM - 1:00 AM' },
     { day: 'Saturday', hours: '4:00 PM - 1:00 AM' },
     { day: 'Sunday', hours: '4:00 PM - 1:00 AM' },
-  ],
+  ] as DaySchedule[],
   services: 'Dine-in, Pick-up, Take-out, and Local Delivery in Malabon City',
   taxRate: 0,
+  staffPin: '2023',
 };
 
 export const MENU_ITEMS: MenuItem[] = [
