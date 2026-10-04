@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Order, OrderStatus, OrderType } from '../../types/allmytea';
+import { Order } from '../../types/allmytea';
 import {
   Table,
   TableHeader,
@@ -10,7 +10,11 @@ import {
 } from '../ui/table';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { Search, Download, Printer, Filter } from 'lucide-react';
+import { Search, Download, Printer } from 'lucide-react';
+import { PageHeader } from '../staff/PageHeader';
+import { Panel } from '../staff/Panel';
+import { StatusBadge } from '../staff/StatusBadge';
+import { EmptyState } from '../staff/EmptyState';
 import { ReceiptModal } from '../pos/ReceiptModal';
 
 interface OrderHistoryViewProps {
@@ -63,72 +67,71 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({ orders }) =>
 
   return (
     <div className="space-y-4">
-      {/* Header and Controls */}
-      <div className="p-4 bg-white border border-neutral-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-        <div>
-          <h2 className="text-base font-bold text-neutral-900">All My Tea Orders & Sales History</h2>
-          <p className="text-xs text-neutral-500 mt-0.5">
-            Log of customer receipts, payments, and dining tickets.
-          </p>
-        </div>
+      <PageHeader
+        title="Orders"
+        description="Every ticket and receipt."
+        actions={
+          <Button variant="outline" size="sm" onClick={handleExportCsv}>
+            <Download className="h-3.5 w-3.5" />
+            Export CSV
+          </Button>
+        }
+      />
 
-        <Button variant="outline" size="sm" onClick={handleExportCsv} className="text-xs">
-          <Download className="w-3.5 h-3.5 mr-1" />
-          Export Orders CSV
-        </Button>
-      </div>
-
-      {/* Filter Bar */}
-      <div className="p-3 bg-white border border-neutral-200 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+      {/* Filters */}
+      <Panel padded className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-stone-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <Input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by order #AMT, customer name, mobile, or item..."
-            className="pl-9 h-8 text-xs bg-neutral-50/50"
+            placeholder="Search order number, name, phone, or item"
+            className="pl-9"
+            aria-label="Search orders"
           />
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 text-xs">
+        <div className="flex items-center gap-2 shrink-0">
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="h-8 px-2.5 text-xs border border-neutral-300 rounded bg-white"
+            aria-label="Channel"
+            className="h-9 rounded-control border border-stone-300 bg-white px-2.5 text-[13px]"
           >
-            <option value="all">All Channels</option>
-            <option value="dine-in">Dine-In</option>
-            <option value="take-out">Take-Out</option>
+            <option value="all">All channels</option>
+            <option value="dine-in">Dine in</option>
+            <option value="take-out">Take out</option>
             <option value="delivery">Delivery</option>
-            <option value="pick-up">Pick-Up</option>
+            <option value="pick-up">Pick up</option>
           </select>
 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-8 px-2.5 text-xs border border-neutral-300 rounded bg-white"
+            aria-label="Status"
+            className="h-9 rounded-control border border-stone-300 bg-white px-2.5 text-[13px]"
           >
-            <option value="all">All Statuses</option>
+            <option value="all">All statuses</option>
             <option value="pending">Pending</option>
             <option value="preparing">Preparing</option>
             <option value="ready">Ready</option>
             <option value="completed">Completed</option>
           </select>
         </div>
-      </div>
+      </Panel>
 
-      {/* Orders Table */}
-      <div className="bg-white border border-neutral-200 rounded-lg shadow-xs overflow-hidden">
+      {/* Orders table */}
+      <Panel>
         <Table>
-          <TableHeader className="bg-neutral-50/80">
-            <TableRow className="border-b border-neutral-200 text-neutral-600 text-[11px] uppercase tracking-wider font-semibold">
-              <TableHead className="py-2.5 px-4">Order #</TableHead>
-              <TableHead className="py-2.5 px-3">Date & Time</TableHead>
-              <TableHead className="py-2.5 px-3">Channel / Type</TableHead>
-              <TableHead className="py-2.5 px-3">Customer / Table</TableHead>
-              <TableHead className="py-2.5 px-3">Items Summary</TableHead>
-              <TableHead className="py-2.5 px-3 text-right">Total Amount</TableHead>
+          <TableHeader className="bg-stone-100">
+            <TableRow className="text-[12px] font-semibold text-stone-700">
+              <TableHead className="py-2.5 px-4">Order</TableHead>
+              <TableHead className="py-2.5 px-3">Date</TableHead>
+              <TableHead className="py-2.5 px-3">Channel</TableHead>
+              <TableHead className="py-2.5 px-3">Customer</TableHead>
+              <TableHead className="py-2.5 px-3">Items</TableHead>
+              <TableHead className="py-2.5 px-3 text-right">Total</TableHead>
               <TableHead className="py-2.5 px-3">Payment</TableHead>
               <TableHead className="py-2.5 px-3">Status</TableHead>
               <TableHead className="py-2.5 pr-4 pl-3 text-right">Receipt</TableHead>
@@ -137,8 +140,8 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({ orders }) =>
           <TableBody>
             {filteredOrders.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="py-12 text-center text-neutral-500 text-xs">
-                  No orders match your filter criteria.
+                <TableCell colSpan={9} className="p-0">
+                  <EmptyState title="No orders match" hint="Change the filters or search for something else." />
                 </TableCell>
               </TableRow>
             ) : (
@@ -146,11 +149,11 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({ orders }) =>
                 const totalItemCount = order.items.reduce((a, b) => a + b.quantity, 0);
 
                 return (
-                  <TableRow key={order.id} className="hover:bg-neutral-50/80 transition-colors">
-                    <TableCell className="py-2.5 px-4 font-mono font-bold text-neutral-900 text-xs">
+                  <TableRow key={order.id}>
+                    <TableCell className="py-2.5 px-4 font-mono font-semibold text-brown-900 text-[13px]">
                       {order.orderNumber}
                     </TableCell>
-                    <TableCell className="py-2.5 px-3 text-[11px] text-neutral-600 font-mono">
+                    <TableCell className="py-2.5 px-3 text-[12px] text-stone-700 whitespace-nowrap">
                       {new Date(order.timestamp).toLocaleString('en-PH', {
                         month: 'short',
                         day: 'numeric',
@@ -158,48 +161,28 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({ orders }) =>
                         minute: '2-digit',
                       })}
                     </TableCell>
-                    <TableCell className="py-2.5 px-3 whitespace-nowrap">
-                      <span className="text-[11px] font-semibold uppercase text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/80">
-                        {order.type}
-                      </span>
+                    <TableCell className="py-2.5 px-3 text-[13px] text-stone-700 capitalize whitespace-nowrap">
+                      {order.type.replace('-', ' ')}
                     </TableCell>
-                    <TableCell className="py-2.5 px-3 text-xs text-neutral-800">
+                    <TableCell className="py-2.5 px-3 text-[13px] text-brown-900">
                       {order.tableNumber || order.customerName || 'Walk-in'}
                     </TableCell>
-                    <TableCell className="py-2.5 px-3 text-xs text-neutral-600 max-w-[200px] truncate">
-                      {totalItemCount}x ({order.items.map((i) => i.name).join(', ')})
+                    <TableCell className="py-2.5 px-3 text-[13px] text-stone-700 max-w-[200px] truncate">
+                      {totalItemCount} items: {order.items.map((i) => i.name).join(', ')}
                     </TableCell>
-                    <TableCell className="py-2.5 px-3 text-right font-mono font-bold text-neutral-900 text-xs tabular-nums">
+                    <TableCell className="py-2.5 px-3 text-right text-[13px] font-semibold text-brown-900">
                       ₱{order.total.toLocaleString()}
                     </TableCell>
-                    <TableCell className="py-2.5 px-3 text-xs text-neutral-600 whitespace-nowrap">
+                    <TableCell className="py-2.5 px-3 text-[13px] text-stone-700 whitespace-nowrap">
                       {order.paymentMethod}
                     </TableCell>
                     <TableCell className="py-2.5 px-3 whitespace-nowrap">
-                      <span
-                        className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                          order.status === 'completed'
-                            ? 'bg-neutral-100 text-neutral-700'
-                            : order.status === 'ready'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : order.status === 'preparing'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-amber-100 text-amber-800'
-                        }`}
-                      >
-                        {order.status}
-                      </span>
+                      <StatusBadge status={order.status} />
                     </TableCell>
                     <TableCell className="py-2.5 pr-4 pl-3 text-right">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setSelectedOrderForReceipt(order)}
-                        className="h-7 text-xs px-2"
-                        title="View / Print Receipt"
-                      >
-                        <Printer className="w-3.5 h-3.5 mr-1" />
-                        Receipt
+                      <Button size="sm" variant="ghost" onClick={() => setSelectedOrderForReceipt(order)}>
+                        <Printer className="w-3.5 h-3.5" />
+                        View
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -208,7 +191,7 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({ orders }) =>
             )}
           </TableBody>
         </Table>
-      </div>
+      </Panel>
 
       <ReceiptModal
         order={selectedOrderForReceipt}
