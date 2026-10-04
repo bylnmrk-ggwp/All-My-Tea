@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logo } from '@/src/assets/images';
 import { MenuItem, MenuCategory, CartItem, Order, OrderType } from '../../types/allmytea';
 import { STORE_INFO } from '../../data/allMyTeaData';
 import { ItemCustomizerModal } from '../pos/ItemCustomizerModal';
@@ -181,7 +182,7 @@ export const CustomerLandingPage: React.FC<CustomerLandingPageProps> = ({
           {/* Brand Logo & Name */}
           <div className="flex items-center gap-3">
             <img
-              src="/src/assets/images/allmytea_logo_badge_1791083133659.jpg"
+              src={logo}
               alt="AllmyTea Logo"
               className="w-10 h-10 rounded-full object-cover border border-amber-300 shadow-2xs shrink-0"
               referrerPolicy="no-referrer"
@@ -255,12 +256,6 @@ export const CustomerLandingPage: React.FC<CustomerLandingPageProps> = ({
       <section className="relative bg-neutral-950 text-white overflow-hidden py-16 lg:py-24">
         {/* Background photo */}
         <div className="absolute inset-0 z-0">
-          <img
-            src="/src/assets/images/allmytea_hero_spread_1791083118808.jpg"
-            alt="AllmyTea Burger, Milktea, Ramen, and Food Spread"
-            className="w-full h-full object-cover opacity-35"
-            referrerPolicy="no-referrer"
-          />
           <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-transparent" />
         </div>
 
@@ -606,17 +601,6 @@ export const CustomerLandingPage: React.FC<CustomerLandingPageProps> = ({
                 </div>
               </div>
             </div>
-
-            <div className="lg:col-span-5">
-              <div className="rounded-lg overflow-hidden border border-neutral-200 shadow-md">
-                <img
-                  src="/src/assets/images/allmytea_cafe_dining_1791083640193.jpg"
-                  alt="AllmyTea cozy cafe ambience"
-                  className="w-full h-80 object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -626,7 +610,7 @@ export const CustomerLandingPage: React.FC<CustomerLandingPageProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <img
-              src="/src/assets/images/allmytea_logo_badge_1791083133659.jpg"
+              src={logo}
               alt="AllmyTea Logo"
               className="w-8 h-8 rounded-full object-cover border border-amber-400/40"
               referrerPolicy="no-referrer"

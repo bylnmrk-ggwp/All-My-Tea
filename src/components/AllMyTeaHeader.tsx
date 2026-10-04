@@ -1,4 +1,5 @@
 import React from 'react';
+import { logo } from '@/src/assets/images';
 import { AppTab } from '../types/allmytea';
 import { STORE_INFO } from '../data/allMyTeaData';
 import { Globe, ShoppingBag, UtensilsCrossed, Package, Receipt, BarChart3, RotateCcw, AlertTriangle } from 'lucide-react';
@@ -30,7 +31,7 @@ export const AllMyTeaHeader: React.FC<AllMyTeaHeaderProps> = ({
           className="flex items-center gap-3 cursor-pointer group"
         >
           <img
-            src="/src/assets/images/allmytea_logo_badge_1791083133659.jpg"
+            src={logo}
             alt="All My Tea Logo"
             className="w-10 h-10 rounded-full object-cover border border-amber-200 shadow-2xs group-hover:scale-105 transition-transform"
             referrerPolicy="no-referrer"

@@ -129,12 +129,6 @@ export const PosView: React.FC<PosViewProps> = ({
       <div className="lg:col-span-8 space-y-4">
         {/* Banner with All My Tea hero photography */}
         <div className="relative rounded-lg overflow-hidden border border-amber-200/80 shadow-xs bg-neutral-900 text-white min-h-[140px] flex items-end">
-          <img
-            src="/src/assets/images/allmytea_hero_spread_1791083118808.jpg"
-            alt="All My Tea Burgers, Milktea, and Ramen Overload"
-            className="absolute inset-0 w-full h-full object-cover opacity-50"
-            referrerPolicy="no-referrer"
-          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
           <div className="relative p-5 z-10 w-full flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>
