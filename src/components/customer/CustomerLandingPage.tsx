@@ -25,7 +25,6 @@ import {
   ChevronRight,
   ExternalLink,
   UtensilsCrossed,
-  Sparkles,
   ShieldCheck,
   CheckCircle,
   Truck,
@@ -268,7 +267,6 @@ export const CustomerLandingPage: React.FC<CustomerLandingPageProps> = ({
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl space-y-4">
             <div className="flex items-center gap-2 text-xs font-semibold text-amber-400">
-              <Sparkles className="w-3.5 h-3.5" />
               <span>MALABON'S FAVORITE BURGER, RAMEN & MILKTEA HUB</span>
             </div>
 

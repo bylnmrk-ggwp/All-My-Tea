@@ -11,7 +11,6 @@ import {
   Minus,
   Trash2,
   ShoppingBag,
-  Sparkles,
   MapPin,
   Phone,
   Clock,
