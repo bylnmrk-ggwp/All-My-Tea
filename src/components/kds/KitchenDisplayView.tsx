@@ -1,12 +1,35 @@
 import React, { useState } from 'react';
 import { Order, OrderStatus } from '../../types/allmytea';
-import { Clock, CheckCircle, Utensils, Coffee, AlertCircle, ArrowRight } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { Button } from '../ui/button';
+import { PageHeader } from '../staff/PageHeader';
+import { Panel } from '../staff/Panel';
+import { EmptyState } from '../staff/EmptyState';
 
 interface KitchenDisplayViewProps {
   orders: Order[];
   onUpdateOrderStatus: (orderId: string, newStatus: OrderStatus) => void;
 }
+
+type ActiveStatus = 'pending' | 'preparing' | 'ready';
+
+const COLUMNS: { status: ActiveStatus; title: string; hint: string; topBorder: string; emptyTitle: string }[] = [
+  { status: 'pending',   title: 'New',       hint: 'Waiting to start',  topBorder: 'border-t-status-pending',   emptyTitle: 'No new tickets' },
+  { status: 'preparing', title: 'Preparing', hint: 'On the line',       topBorder: 'border-t-status-preparing', emptyTitle: 'Nothing in progress' },
+  { status: 'ready',     title: 'Ready',     hint: 'Serve or dispatch', topBorder: 'border-t-status-ready',     emptyTitle: 'Nothing waiting for pickup' },
+];
+
+const NEXT: Record<ActiveStatus, { status: OrderStatus; label: string; variant: 'default' | 'brand' }> = {
+  pending:   { status: 'preparing', label: 'Start preparing', variant: 'default' },
+  preparing: { status: 'ready',     label: 'Mark ready',      variant: 'default' },
+  ready:     { status: 'completed', label: 'Complete',        variant: 'brand' },
+};
+
+const LEFT_BORDER: Record<ActiveStatus, string> = {
+  pending: 'border-l-status-pending',
+  preparing: 'border-l-status-preparing',
+  ready: 'border-l-status-ready',
+};
 
 export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({
   orders,
@@ -14,11 +37,7 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({
 }) => {
   const [stationFilter, setStationFilter] = useState<'All' | 'Drinks' | 'Kitchen'>('All');
 
-  // Filter orders by active status
-  const pendingOrders = orders.filter((o) => o.status === 'pending');
-  const preparingOrders = orders.filter((o) => o.status === 'preparing');
-  const readyOrders = orders.filter((o) => o.status === 'ready');
-  const completedOrders = orders.filter((o) => o.status === 'completed').slice(0, 5);
+  const ordersFor = (status: OrderStatus) => orders.filter((o) => o.status === status);
 
   const getFilteredItems = (order: Order) => {
     if (stationFilter === 'All') return order.items;
@@ -45,336 +64,111 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* KDS Header & Station Filter */}
-      <div className="p-4 bg-white border border-neutral-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-        <div>
-          <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
-            <Utensils className="w-4 h-4 text-amber-800" />
-            <span>Kitchen & Barista Display System (KDS)</span>
-          </h2>
-          <p className="text-xs text-neutral-500 mt-0.5">
-            Live queue for order preparation, drink assembly, and meal dispatch.
-          </p>
-        </div>
-
-        {/* Station Tabs */}
-        <div className="flex items-center gap-1.5 p-1 bg-neutral-100 rounded-md text-xs font-medium">
-          <button
-            onClick={() => setStationFilter('All')}
-            className={`px-3 py-1 rounded transition-colors ${
-              stationFilter === 'All'
-                ? 'bg-white text-neutral-900 shadow-xs font-semibold'
-                : 'text-neutral-600 hover:text-neutral-900'
-            }`}
-          >
-            All Stations
-          </button>
-          <button
-            onClick={() => setStationFilter('Drinks')}
-            className={`px-3 py-1 rounded transition-colors flex items-center gap-1 ${
-              stationFilter === 'Drinks'
-                ? 'bg-white text-amber-900 shadow-xs font-semibold'
-                : 'text-neutral-600 hover:text-neutral-900'
-            }`}
-          >
-            <Coffee className="w-3 h-3" />
-            <span>Barista / Drinks</span>
-          </button>
-          <button
-            onClick={() => setStationFilter('Kitchen')}
-            className={`px-3 py-1 rounded transition-colors flex items-center gap-1 ${
-              stationFilter === 'Kitchen'
-                ? 'bg-white text-rose-900 shadow-xs font-semibold'
-                : 'text-neutral-600 hover:text-neutral-900'
-            }`}
-          >
-            <Utensils className="w-3 h-3" />
-            <span>Burger & Ramen Grill</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 3-Column Kanban Board */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-        {/* Column 1: Pending */}
-        <div className="space-y-3">
-          <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-md flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              <span>New Tickets ({pendingOrders.length})</span>
-            </div>
-            <span className="text-[11px] text-amber-700">Waiting to prepare</span>
+      <PageHeader
+        title="Kitchen display"
+        description="Live queue for drinks, kitchen, and dispatch."
+        actions={
+          <div className="flex gap-1 rounded-control bg-stone-200 p-1 text-[12px]">
+            {(['All', 'Drinks', 'Kitchen'] as const).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setStationFilter(s)}
+                aria-pressed={stationFilter === s}
+                className={`rounded-control px-3 py-1 font-semibold ${stationFilter === s ? 'bg-white text-brown-900' : 'text-stone-700 hover:text-brown-900'}`}
+              >
+                {s}
+              </button>
+            ))}
           </div>
+        }
+      />
 
-          <div className="space-y-3">
-            {pendingOrders.length === 0 ? (
-              <div className="p-8 text-center text-xs text-neutral-400 bg-white border border-neutral-200 rounded-lg">
-                No new pending orders
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 items-start">
+        {COLUMNS.map((col) => {
+          const list = ordersFor(col.status);
+          const next = NEXT[col.status];
+          return (
+            <Panel key={col.status} className={`border-t-4 ${col.topBorder}`}>
+              <div className="flex items-baseline justify-between border-b border-stone-300 px-4 py-3">
+                <h2 className="text-[15px] font-semibold text-brown-900">
+                  {col.title} <span className="text-stone-500">({list.length})</span>
+                </h2>
+                <span className="text-[12px] text-stone-500">{col.hint}</span>
               </div>
-            ) : (
-              pendingOrders.map((order) => {
-                const visibleItems = getFilteredItems(order);
-                if (visibleItems.length === 0) return null;
-
-                return (
-                  <div
-                    key={order.id}
-                    className="p-4 bg-white border-2 border-amber-300 rounded-lg shadow-xs space-y-3"
-                  >
-                    {/* Ticket Header */}
-                    <div className="flex items-start justify-between border-b border-neutral-100 pb-2">
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-mono text-sm font-bold text-neutral-900">
-                            {order.orderNumber}
-                          </span>
-                          <span className="text-[10px] uppercase font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                            {order.type}
-                          </span>
-                        </div>
-                        <div className="text-xs text-neutral-600 font-medium mt-0.5">
-                          {order.tableNumber || order.customerName || 'Walk-in'}
-                        </div>
-                      </div>
-
-                      <div className="text-right text-[11px] text-neutral-500 flex items-center gap-1 font-mono">
-                        <Clock className="w-3 h-3 text-neutral-400" />
-                        <span>{getElapsedTime(order.timestamp)}</span>
-                      </div>
-                    </div>
-
-                    {/* Order Items */}
-                    <div className="space-y-2 text-xs divide-y divide-neutral-100">
-                      {visibleItems.map((item, idx) => (
-                        <div key={idx} className="pt-1.5 first:pt-0">
-                          <div className="font-bold text-neutral-900 flex justify-between">
-                            <span>
-                              {item.quantity}x {item.name}
-                            </span>
-                            <span className="text-[10px] text-neutral-400 font-normal">
-                              {item.category}
-                            </span>
-                          </div>
-
-                          {/* Customizations */}
-                          <div className="text-[11px] text-neutral-600 pl-2 mt-0.5 space-y-0.5">
-                            {item.customization.size && (
-                              <span className="font-semibold text-neutral-800">
-                                [{item.customization.size}]{' '}
-                              </span>
-                            )}
-                            {item.customization.sugarLevel && (
-                              <span>{item.customization.sugarLevel} sugar · {item.customization.iceLevel}</span>
-                            )}
-                            {item.customization.spiciness && (
-                              <span className="text-rose-700 font-semibold block">
-                                Spice: {item.customization.spiciness}
-                              </span>
-                            )}
-                            {item.customization.addons && item.customization.addons.length > 0 && (
-                              <span className="text-amber-800 font-semibold block">
-                                + {item.customization.addons.map((a) => a.name).join(', ')}
-                              </span>
-                            )}
-                            {item.customization.specialInstructions && (
-                              <span className="italic text-neutral-700 bg-yellow-50 px-1 rounded block mt-0.5">
-                                Note: {item.customization.specialInstructions}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Action Button */}
-                    <Button
-                      size="sm"
-                      onClick={() => onUpdateOrderStatus(order.id, 'preparing')}
-                      className="w-full bg-amber-800 hover:bg-amber-900 text-white font-semibold text-xs flex items-center justify-center gap-1.5"
+              <div className="space-y-3 p-3">
+                {list.length === 0 && <EmptyState title={col.emptyTitle} />}
+                {list.map((order) => {
+                  const visibleItems = getFilteredItems(order);
+                  if (visibleItems.length === 0) return null;
+                  return (
+                    <article
+                      key={order.id}
+                      className={`space-y-3 rounded-control border border-stone-300 border-l-4 ${LEFT_BORDER[col.status]} bg-white p-3`}
                     >
-                      <span>Start Preparing</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        {/* Column 2: Preparing */}
-        <div className="space-y-3">
-          <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-md flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-bold text-blue-900">
-              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              <span>In Preparation ({preparingOrders.length})</span>
-            </div>
-            <span className="text-[11px] text-blue-700">Currently cooking/brewing</span>
-          </div>
-
-          <div className="space-y-3">
-            {preparingOrders.length === 0 ? (
-              <div className="p-8 text-center text-xs text-neutral-400 bg-white border border-neutral-200 rounded-lg">
-                No orders currently in prep
-              </div>
-            ) : (
-              preparingOrders.map((order) => {
-                const visibleItems = getFilteredItems(order);
-                if (visibleItems.length === 0) return null;
-
-                return (
-                  <div
-                    key={order.id}
-                    className="p-4 bg-white border-2 border-blue-300 rounded-lg shadow-xs space-y-3"
-                  >
-                    <div className="flex items-start justify-between border-b border-neutral-100 pb-2">
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-mono text-sm font-bold text-neutral-900">
-                            {order.orderNumber}
-                          </span>
-                          <span className="text-[10px] uppercase font-bold text-blue-800 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
-                            {order.type}
-                          </span>
-                        </div>
-                        <div className="text-xs text-neutral-600 font-medium mt-0.5">
-                          {order.tableNumber || order.customerName || 'Walk-in'}
-                        </div>
-                      </div>
-
-                      <div className="text-right text-[11px] text-blue-700 flex items-center gap-1 font-mono font-medium">
-                        <Clock className="w-3 h-3 text-blue-500" />
-                        <span>{getElapsedTime(order.timestamp)}</span>
-                      </div>
-                    </div>
-
-                    {/* Order Items */}
-                    <div className="space-y-2 text-xs divide-y divide-neutral-100">
-                      {visibleItems.map((item, idx) => (
-                        <div key={idx} className="pt-1.5 first:pt-0">
-                          <div className="font-bold text-neutral-900 flex justify-between">
-                            <span>
-                              {item.quantity}x {item.name}
-                            </span>
-                            <span className="text-[10px] text-neutral-400 font-normal">
-                              {item.category}
-                            </span>
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="font-mono text-[22px] font-bold leading-none text-brown-900">{order.orderNumber}</div>
+                          <div className="mt-1 text-[12px] text-stone-700 capitalize">
+                            {order.type.replace('-', ' ')}, {order.tableNumber || order.customerName || 'Walk-in'}
                           </div>
-
-                          <div className="text-[11px] text-neutral-600 pl-2 mt-0.5 space-y-0.5">
-                            {item.customization.size && (
-                              <span className="font-semibold text-neutral-800">
-                                [{item.customization.size}]{' '}
-                              </span>
-                            )}
-                            {item.customization.sugarLevel && (
-                              <span>{item.customization.sugarLevel} sugar · {item.customization.iceLevel}</span>
-                            )}
-                            {item.customization.spiciness && (
-                              <span className="text-rose-700 font-semibold block">
-                                Spice: {item.customization.spiciness}
-                              </span>
-                            )}
-                            {item.customization.addons && item.customization.addons.length > 0 && (
-                              <span className="text-amber-800 font-semibold block">
-                                + {item.customization.addons.map((a) => a.name).join(', ')}
-                              </span>
-                            )}
-                            {item.customization.specialInstructions && (
-                              <span className="italic text-neutral-700 bg-yellow-50 px-1 rounded block mt-0.5">
-                                Note: {item.customization.specialInstructions}
-                              </span>
-                            )}
-                          </div>
+                          {order.deliveryAddress && (
+                            <div className="text-[12px] text-stone-700">Deliver to {order.deliveryAddress}</div>
+                          )}
                         </div>
-                      ))}
-                    </div>
+                        <span className="inline-flex items-center gap-1 text-[12px] text-stone-500">
+                          <Clock className="h-3 w-3" />
+                          {getElapsedTime(order.timestamp)}
+                        </span>
+                      </div>
 
-                    {/* Action Button */}
-                    <Button
-                      size="sm"
-                      onClick={() => onUpdateOrderStatus(order.id, 'ready')}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5"
-                    >
-                      <CheckCircle className="w-3.5 h-3.5" />
-                      <span>Ready for Serving / Pick-up</span>
-                    </Button>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
+                      <ul className="divide-y divide-stone-300 text-[13px]">
+                        {visibleItems.map((item, idx) => (
+                          <li key={idx} className="py-1.5 first:pt-0 last:pb-0">
+                            <div className="flex justify-between font-semibold text-brown-900">
+                              <span>{item.quantity}x {item.name}</span>
+                              <span className="text-[11px] font-normal text-stone-500">{item.category}</span>
+                            </div>
+                            <div className="mt-0.5 space-y-0.5 pl-2 text-[12px] text-stone-700">
+                              {item.customization.size && (
+                                <span className="font-semibold text-brown-900">{item.customization.size} </span>
+                              )}
+                              {item.customization.sugarLevel && (
+                                <span>{item.customization.sugarLevel} sugar, {item.customization.iceLevel}</span>
+                              )}
+                              {item.customization.spiciness && (
+                                <span className="block font-semibold text-status-danger">{item.customization.spiciness}</span>
+                              )}
+                              {item.customization.addons && item.customization.addons.length > 0 && (
+                                <span className="block font-semibold text-brown-700">
+                                  + {item.customization.addons.map((a) => a.name).join(', ')}
+                                </span>
+                              )}
+                              {item.customization.specialInstructions && (
+                                <span className="mt-0.5 block rounded-control bg-brand-500/20 px-1.5 py-0.5 italic text-brown-900">
+                                  Note: {item.customization.specialInstructions}
+                                </span>
+                              )}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
 
-        {/* Column 3: Ready for Pick-up / Delivery */}
-        <div className="space-y-3">
-          <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-md flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-bold text-emerald-900">
-              <CheckCircle className="w-4 h-4 text-emerald-600" />
-              <span>Ready for Dispatch ({readyOrders.length})</span>
-            </div>
-            <span className="text-[11px] text-emerald-700">Serve to customer</span>
-          </div>
-
-          <div className="space-y-3">
-            {readyOrders.length === 0 ? (
-              <div className="p-8 text-center text-xs text-neutral-400 bg-white border border-neutral-200 rounded-lg">
-                No orders waiting for pickup
+                      <Button
+                        size="sm"
+                        variant={next.variant}
+                        className="w-full"
+                        onClick={() => onUpdateOrderStatus(order.id, next.status)}
+                      >
+                        {next.label}
+                      </Button>
+                    </article>
+                  );
+                })}
               </div>
-            ) : (
-              readyOrders.map((order) => (
-                <div
-                  key={order.id}
-                  className="p-4 bg-white border-2 border-emerald-300 rounded-lg shadow-xs space-y-3"
-                >
-                  <div className="flex items-start justify-between border-b border-neutral-100 pb-2">
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-sm font-bold text-neutral-900">
-                          {order.orderNumber}
-                        </span>
-                        <span className="text-[10px] uppercase font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                          {order.type}
-                        </span>
-                      </div>
-                      <div className="text-xs text-neutral-700 font-semibold mt-0.5">
-                        {order.tableNumber || order.customerName || 'Customer Counter'}
-                      </div>
-                      {order.deliveryAddress && (
-                        <p className="text-[11px] text-neutral-500 mt-0.5">
-                          Delivery: {order.deliveryAddress}
-                        </p>
-                      )}
-                    </div>
-
-                    <span className="font-mono font-bold text-xs text-emerald-700">
-                      ₱{order.total}
-                    </span>
-                  </div>
-
-                  <div className="text-xs text-neutral-600 space-y-1">
-                    {order.items.map((i, idx) => (
-                      <div key={idx} className="flex justify-between">
-                        <span>{i.quantity}x {i.name}</span>
-                        <span className="text-neutral-400 font-mono">
-                          {i.customization.size || ''}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <Button
-                    size="sm"
-                    onClick={() => onUpdateOrderStatus(order.id, 'completed')}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5"
-                  >
-                    <span>Mark Fulfilled / Done</span>
-                  </Button>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+            </Panel>
+          );
+        })}
       </div>
     </div>
   );
