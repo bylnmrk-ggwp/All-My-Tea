@@ -3,17 +3,19 @@ import type { OrderStatus, StockMovement } from '../../types/allmytea';
 
 type Status = OrderStatus | StockMovement['type'] | 'low';
 
+// Status hues come from the @theme tokens in index.css so badges, KDS borders,
+// and KPI tones read as one system.
 const STYLES: Record<Status, { label: string; className: string }> = {
-  pending:    { label: 'Pending',    className: 'bg-brand-500/20 text-brown-700' },
-  preparing:  { label: 'Preparing',  className: 'bg-blue-100 text-blue-800' },
-  ready:      { label: 'Ready',      className: 'bg-green-100 text-green-800' },
+  pending:    { label: 'Pending',    className: 'bg-status-pending/20 text-brown-700' },
+  preparing:  { label: 'Preparing',  className: 'bg-status-preparing/15 text-status-preparing' },
+  ready:      { label: 'Ready',      className: 'bg-status-ready/15 text-status-ready' },
   completed:  { label: 'Completed',  className: 'bg-stone-100 text-stone-700' },
-  cancelled:  { label: 'Cancelled',  className: 'bg-red-100 text-red-800' },
-  in:         { label: 'Stock in',   className: 'bg-green-100 text-green-800' },
+  cancelled:  { label: 'Cancelled',  className: 'bg-status-danger/15 text-status-danger' },
+  in:         { label: 'Stock in',   className: 'bg-status-ready/15 text-status-ready' },
   out:        { label: 'Used',       className: 'bg-stone-100 text-stone-700' },
-  spoilage:   { label: 'Waste',      className: 'bg-red-100 text-red-800' },
-  adjustment: { label: 'Adjusted',   className: 'bg-blue-100 text-blue-800' },
-  low:        { label: 'Low',        className: 'bg-brand-500/20 text-brown-700' },
+  spoilage:   { label: 'Waste',      className: 'bg-status-danger/15 text-status-danger' },
+  adjustment: { label: 'Adjusted',   className: 'bg-status-preparing/15 text-status-preparing' },
+  low:        { label: 'Low',        className: 'bg-status-pending/20 text-brown-700' },
 };
 
 export const StatusBadge: React.FC<{ status: Status }> = ({ status }) => {

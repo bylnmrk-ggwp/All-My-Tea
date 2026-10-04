@@ -9,6 +9,7 @@ import { FindUs } from './sections/FindUs';
 import { Footer } from './sections/Footer';
 import { CartDrawer } from './sections/CartDrawer';
 import { StickyCartBar } from './sections/StickyCartBar';
+import { buildOrderMessage, messengerUrl } from '../../lib/messengerOrder';
 
 interface CustomerLandingPageProps {
   menuItems: MenuItem[];
@@ -64,10 +65,22 @@ export const CustomerLandingPage: React.FC<CustomerLandingPageProps> = ({ menuIt
 
   const remove = (cartItemId: string) => setCart((prev) => prev.filter((i) => i.cartItemId !== cartItemId));
 
+  // Empty cart: open Messenger with the greeting; otherwise review the order first.
+  const handleHeroOrder = () => {
+    if (cart.length > 0) {
+      setDrawerOpen(true);
+      return;
+    }
+    const url = messengerUrl(buildOrderMessage([], { orderType: 'pick-up', name: '', phone: '' }));
+    const popup = window.open(url, '_blank');
+    if (popup) popup.opener = null;
+    else window.location.href = url;
+  };
+
   return (
     <div className="min-h-screen bg-white pb-20 text-brown-900 md:pb-0">
       <TopNav cartCount={cartCount} onOpenCart={() => setDrawerOpen(true)} />
-      <Hero onOrder={() => setDrawerOpen(true)} />
+      <Hero onOrder={handleHeroOrder} />
       <MenuBrowser items={menuItems} category={category} onCategory={setCategory} query={query} onQuery={setQuery} onAdd={handleAdd} />
       <HowToOrder />
       <FindUs />

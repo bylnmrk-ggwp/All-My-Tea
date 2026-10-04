@@ -53,15 +53,25 @@ function localParts(now: Date, timeZone: string): { weekday: string; minutes: nu
   return { weekday: get('weekday'), minutes: Number(get('hour')) * 60 + Number(get('minute')) };
 }
 
+function entryFor(schedule: DaySchedule[], weekday: string): DaySchedule | undefined {
+  return schedule.find((d) => d.day === weekday);
+}
+
 function scheduleFor(schedule: DaySchedule[], weekday: string) {
-  const entry = schedule.find((d) => d.day === weekday);
+  const entry = entryFor(schedule, weekday);
   return entry ? parseHours(entry.hours) : null;
+}
+
+/** "Closed", "closed", "Rest day" and similar owner-typed markers mean a deliberate day off. */
+function isClosedMarker(text: string): boolean {
+  return /^\s*(closed|rest\s*day|day\s*off)\s*$/i.test(text);
 }
 
 /**
  * Open/closed status at `now`, evaluated in the store's time zone.
  * A range whose close is at or before its open (4:00 PM - 1:00 AM) runs past midnight,
- * so the early hours of a day belong to the previous day's service.
+ * so the early hours of a day belong to the previous day's service. That carry-over is
+ * checked first so a rest day still shows the previous night's service until it closes.
  */
 export function getStoreStatus(
   now: Date,
@@ -69,10 +79,6 @@ export function getStoreStatus(
   timeZone = 'Asia/Manila',
 ): StoreStatus {
   const { weekday, minutes } = localParts(now, timeZone);
-  const today = scheduleFor(schedule, weekday);
-  if (!today) return { open: false, label: 'Hours unavailable' };
-
-  const overnight = today.closes <= today.opens;
 
   // Still inside yesterday's overnight window?
   const yesterdayName = WEEKDAYS[(WEEKDAYS.indexOf(weekday) + 6) % 7];
@@ -80,6 +86,15 @@ export function getStoreStatus(
   if (yesterday && yesterday.closes <= yesterday.opens && minutes < yesterday.closes) {
     return { open: true, label: `Open now, closes ${formatClock(yesterday.closes)}` };
   }
+
+  const todayEntry = entryFor(schedule, weekday);
+  const today = todayEntry ? parseHours(todayEntry.hours) : null;
+  if (!today) {
+    const label = todayEntry && isClosedMarker(todayEntry.hours) ? 'Closed today' : 'Hours unavailable';
+    return { open: false, label };
+  }
+
+  const overnight = today.closes <= today.opens;
 
   const openNow = overnight
     ? minutes >= today.opens

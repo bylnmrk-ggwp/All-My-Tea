@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Order, OrderStatus } from '../../types/allmytea';
 import { Clock } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -36,6 +36,13 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({
   onUpdateOrderStatus,
 }) => {
   const [stationFilter, setStationFilter] = useState<'All' | 'Drinks' | 'Kitchen'>('All');
+
+  // Ticket ages are computed from Date.now() during render; tick every 30 s so they advance.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setTick((t) => t + 1), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
 
   const ordersFor = (status: OrderStatus) => orders.filter((o) => o.status === status);
 

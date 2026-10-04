@@ -32,10 +32,26 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange, cart
 
   const send = async () => {
     const message = buildOrderMessage(cart, { orderType, name, phone, address, note });
-    try { await navigator.clipboard.writeText(message); } catch { /* clipboard blocked: the URL still carries the text */ }
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 4000);
-    window.open(messengerUrl(message), '_blank', 'noopener');
+    const url = messengerUrl(message);
+    // Open before any await so the tap still counts as a user gesture (mobile Safari).
+    // No 'noopener' feature flag: with it window.open always returns null, which would
+    // make the blocked-popup fallback fire every time.
+    const popup = window.open(url, '_blank');
+    if (popup) {
+      popup.opener = null;
+    } else {
+      window.location.href = url;
+      return;
+    }
+    let copiedOk = false;
+    try {
+      await navigator.clipboard.writeText(message);
+      copiedOk = true;
+    } catch {
+      // Clipboard blocked (insecure context or denied permission): the URL still carries the text.
+    }
+    setCopied(copiedOk);
+    if (copiedOk) window.setTimeout(() => setCopied(false), 4000);
   };
 
   return (

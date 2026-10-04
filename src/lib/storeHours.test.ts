@@ -54,9 +54,23 @@ describe('getStoreStatus with a 4:00 PM to 1:00 AM day', () => {
     expect(getStoreStatus(manila('01:01', 1), DAILY)).toEqual({ open: false, label: 'Closed, opens 4:00 PM' });
   });
 
-  it('reports unavailable hours instead of throwing on a malformed entry', () => {
-    const broken = DAILY.map((d) => ({ ...d, hours: 'Closed' }));
-    expect(getStoreStatus(manila('18:00'), broken)).toEqual({ open: false, label: 'Hours unavailable' });
+  it('treats an all-"Closed" schedule as closed today without throwing', () => {
+    const closedAllWeek = DAILY.map((d) => ({ ...d, hours: 'Closed' }));
+    expect(getStoreStatus(manila('18:00'), closedAllWeek)).toEqual({ open: false, label: 'Closed today' });
+  });
+
+  it('labels a rest day "Closed today" and still honours the previous night', () => {
+    // Monday open 4 PM - 1 AM, Tuesday is a rest day.
+    const mixed = DAILY.map((d) => (d.day === 'Tuesday' ? { ...d, hours: 'Closed' } : d));
+    expect(getStoreStatus(manila('00:30', 1), mixed)).toEqual({ open: true, label: 'Open now, closes 1:00 AM' });
+    expect(getStoreStatus(manila('18:00', 1), mixed)).toEqual({ open: false, label: 'Closed today' });
+  });
+
+  it('reports unavailable hours for an unparseable entry or a missing weekday', () => {
+    const garbage = DAILY.map((d) => (d.day === 'Tuesday' ? { ...d, hours: '4PM-1AM' } : d));
+    expect(getStoreStatus(manila('18:00', 1), garbage)).toEqual({ open: false, label: 'Hours unavailable' });
+    const missing = DAILY.filter((d) => d.day !== 'Tuesday');
+    expect(getStoreStatus(manila('18:00', 1), missing)).toEqual({ open: false, label: 'Hours unavailable' });
   });
 
   it('respects the time zone argument', () => {
