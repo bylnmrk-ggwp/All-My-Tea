@@ -19,7 +19,12 @@ import {
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Package, Plus, Minus, Download, AlertTriangle, CheckCircle2, History } from 'lucide-react';
+import { Plus, Minus, Download } from 'lucide-react';
+import { PageHeader } from '../staff/PageHeader';
+import { Panel } from '../staff/Panel';
+import { KpiCard } from '../staff/KpiCard';
+import { StatusBadge } from '../staff/StatusBadge';
+import { EmptyState } from '../staff/EmptyState';
 
 interface StoreInventoryViewProps {
   ingredients: StoreIngredient[];
@@ -78,7 +83,7 @@ export const StoreInventoryView: React.FC<StoreInventoryViewProps> = ({
       unit: newUnit,
       reorderThreshold: newThreshold,
       costPerUnit: newCost,
-      supplier: newSupplier.trim() || 'Diffun Local Vendor',
+      supplier: newSupplier.trim() || 'Local supplier',
     });
 
     setIsAddModalOpen(false);
@@ -107,85 +112,60 @@ export const StoreInventoryView: React.FC<StoreInventoryViewProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const today = new Date().toISOString().slice(0, 10);
+  const movementsToday = movements.filter((m) => m.timestamp.slice(0, 10) === today).length;
+
   return (
     <div className="space-y-4">
-      {/* Low Stock Alert Notice Banner */}
-      {lowStockCount > 0 && (
-        <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-lg flex items-center justify-between gap-3 text-rose-950 text-xs shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <span className="p-1.5 bg-rose-600 text-white rounded-md flex items-center justify-center shrink-0">
-              <AlertTriangle className="w-4 h-4" />
-            </span>
-            <div>
-              <span className="font-bold text-sm block text-rose-900">
-                Low Stock Alert: {lowStockCount} {lowStockCount === 1 ? 'item is' : 'items are'} below safety reorder threshold
-              </span>
-              <span className="text-rose-700 text-[11px]">
-                Please review the highlighted items below and receive fresh shipments or adjust stock accordingly.
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Top Banner & KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 bg-white border border-neutral-200 rounded-lg shadow-xs">
-          <span className="text-xs text-neutral-500 block">Total Ingredients Inventory Value</span>
-          <span className="text-2xl font-bold font-mono text-neutral-900 tabular-nums block mt-1">
-            ₱{totalValuation.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </span>
-          <span className="text-[11px] text-neutral-500 mt-1 block">Across {ingredients.length} supply items</span>
-        </div>
-
-        <div className="p-4 bg-white border border-neutral-200 rounded-lg shadow-xs">
-          <span className="text-xs text-neutral-500 block">Low Stock Warnings</span>
-          <span className={`text-2xl font-bold font-mono tabular-nums block mt-1 ${lowStockCount > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>
-            {lowStockCount} items
-          </span>
-          <span className="text-[11px] text-neutral-500 mt-1 block">At or below reorder safety buffer</span>
-        </div>
-
-        <div className="p-4 bg-white border border-neutral-200 rounded-lg shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-xs text-neutral-500 block">Inventory Controls</span>
-            <span className="text-xs font-semibold text-neutral-800 block mt-1">Export or Register</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleExportCsv} className="text-xs">
-              <Download className="w-3.5 h-3.5 mr-1" />
-              CSV
+      <PageHeader
+        title="Stock"
+        description="Ingredients and packaging on hand."
+        actions={
+          <>
+            <Button variant="outline" size="sm" onClick={handleExportCsv}>
+              <Download className="h-3.5 w-3.5" />
+              Export CSV
             </Button>
-            <Button size="sm" onClick={() => setIsAddModalOpen(true)} className="bg-amber-800 hover:bg-amber-900 text-white text-xs">
-              <Plus className="w-3.5 h-3.5 mr-1" />
-              New Item
+            <Button size="sm" onClick={() => setIsAddModalOpen(true)}>
+              <Plus className="h-3.5 w-3.5" />
+              Add item
             </Button>
-          </div>
-        </div>
+          </>
+        }
+      />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <KpiCard
+          label="Stock value"
+          value={`₱${totalValuation.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          hint={`${ingredients.length} items`}
+        />
+        <KpiCard
+          label="Low stock"
+          value={lowStockCount}
+          hint="At or below the reorder level"
+          tone={lowStockCount > 0 ? 'warn' : 'good'}
+        />
+        <KpiCard label="Movements today" value={movementsToday} hint="Receipts, use, waste, adjustments" />
       </div>
 
-      {/* Main Ingredients Table */}
-      <div className="bg-white border border-neutral-200 rounded-lg shadow-xs overflow-hidden">
-        <div className="p-4 border-b border-neutral-200 bg-neutral-50/70 flex items-center justify-between">
-          <div>
-            <h3 className="font-bold text-sm text-neutral-900">Store Ingredients & Packaging Stock</h3>
-            <p className="text-xs text-neutral-500 mt-0.5">
-              Live levels of beef patties, boba pearls, milk tea creamers, ramen noodles, and cups.
-            </p>
-          </div>
+      {/* Ingredients table */}
+      <Panel>
+        <div className="border-b border-stone-300 px-4 py-3">
+          <h2 className="text-[15px] font-semibold text-brown-900">Ingredients and packaging</h2>
         </div>
 
         <Table>
-          <TableHeader className="bg-neutral-50/60">
-            <TableRow className="border-b border-neutral-200 text-neutral-600 text-[11px] uppercase tracking-wider font-semibold">
-              <TableHead className="py-2.5 px-4">Ingredient / Supply</TableHead>
+          <TableHeader className="bg-stone-100">
+            <TableRow className="text-[12px] font-semibold text-stone-700">
+              <TableHead className="py-2.5 px-4">Item</TableHead>
               <TableHead className="py-2.5 px-3">Category</TableHead>
-              <TableHead className="py-2.5 px-3 text-right">Current Stock</TableHead>
-              <TableHead className="py-2.5 px-3 text-right">Min Threshold</TableHead>
-              <TableHead className="py-2.5 px-3 text-right">Unit Cost</TableHead>
-              <TableHead className="py-2.5 px-3 text-right">Holding Value</TableHead>
+              <TableHead className="py-2.5 px-3 text-right">On hand</TableHead>
+              <TableHead className="py-2.5 px-3 text-right">Reorder at</TableHead>
+              <TableHead className="py-2.5 px-3 text-right">Unit cost</TableHead>
+              <TableHead className="py-2.5 px-3 text-right">Value</TableHead>
               <TableHead className="py-2.5 px-3">Supplier</TableHead>
-              <TableHead className="py-2.5 pr-4 pl-3 text-right">Quick Stock Action</TableHead>
+              <TableHead className="py-2.5 pr-4 pl-3 text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -194,52 +174,38 @@ export const StoreInventoryView: React.FC<StoreInventoryViewProps> = ({
               const val = ing.stock * ing.costPerUnit;
 
               return (
-                <TableRow key={ing.id} className="hover:bg-neutral-50/80 transition-colors">
+                <TableRow key={ing.id} className={isLow ? 'bg-brand-500/10' : ''}>
                   <TableCell className="py-2.5 px-4">
-                    <span className="font-bold text-neutral-900 text-xs block">{ing.name}</span>
-                    <span className="text-[10px] text-neutral-400">
-                      Restocked: {new Date(ing.lastRestocked).toLocaleDateString()}
+                    <span className="block text-[13px] font-semibold text-brown-900">{ing.name}</span>
+                    <span className="text-[12px] text-stone-500">
+                      Restocked {new Date(ing.lastRestocked).toLocaleDateString()}
                     </span>
                   </TableCell>
-                  <TableCell className="py-2.5 px-3 text-neutral-600 text-xs">{ing.category}</TableCell>
-                  <TableCell className="py-2.5 px-3 text-right font-mono tabular-nums text-xs font-bold">
-                    <span className={isLow ? 'text-amber-700' : 'text-neutral-900'}>
-                      {ing.stock} {ing.unit}
+                  <TableCell className="py-2.5 px-3 text-[13px] text-stone-700">{ing.category}</TableCell>
+                  <TableCell className="py-2.5 px-3 text-right text-[13px] font-semibold text-brown-900">
+                    <span className="inline-flex items-center gap-2">
+                      {isLow && <StatusBadge status="low" />}
+                      <span>{ing.stock} {ing.unit}</span>
                     </span>
-                    {isLow && (
-                      <span className="block text-[10px] text-amber-700 font-normal">Reorder Alert</span>
-                    )}
                   </TableCell>
-                  <TableCell className="py-2.5 px-3 text-right font-mono tabular-nums text-xs text-neutral-600">
+                  <TableCell className="py-2.5 px-3 text-right text-[13px] text-stone-700">
                     {ing.reorderThreshold} {ing.unit}
                   </TableCell>
-                  <TableCell className="py-2.5 px-3 text-right font-mono tabular-nums text-xs text-neutral-600">
+                  <TableCell className="py-2.5 px-3 text-right text-[13px] text-stone-700">
                     ₱{ing.costPerUnit.toFixed(2)}
                   </TableCell>
-                  <TableCell className="py-2.5 px-3 text-right font-mono tabular-nums text-xs font-semibold text-neutral-900">
+                  <TableCell className="py-2.5 px-3 text-right text-[13px] font-semibold text-brown-900">
                     ₱{val.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </TableCell>
-                  <TableCell className="py-2.5 px-3 text-xs text-neutral-600">{ing.supplier}</TableCell>
+                  <TableCell className="py-2.5 px-3 text-[13px] text-stone-700">{ing.supplier}</TableCell>
                   <TableCell className="py-2.5 pr-4 pl-3 text-right">
                     <div className="inline-flex items-center gap-1.5">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleOpenAdjust(ing, 'in')}
-                        className="h-7 text-xs px-2 text-emerald-700 hover:text-emerald-800"
-                        title="Receive Stock"
-                      >
-                        <Plus className="w-3 h-3 mr-1" />
+                      <Button size="sm" variant="outline" onClick={() => handleOpenAdjust(ing, 'in')}>
+                        <Plus className="h-3 w-3" />
                         Receive
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleOpenAdjust(ing, 'waste')}
-                        className="h-7 text-xs px-2 text-rose-700 hover:text-rose-800"
-                        title="Record Waste"
-                      >
-                        <Minus className="w-3 h-3 mr-1" />
+                      <Button size="sm" variant="ghost" onClick={() => handleOpenAdjust(ing, 'waste')}>
+                        <Minus className="h-3 w-3" />
                         Waste
                       </Button>
                     </div>
@@ -249,54 +215,52 @@ export const StoreInventoryView: React.FC<StoreInventoryViewProps> = ({
             })}
           </TableBody>
         </Table>
-      </div>
+      </Panel>
 
-      {/* Recent Movements Log */}
-      {movements.length > 0 && (
-        <div className="bg-white border border-neutral-200 rounded-lg p-4 shadow-xs space-y-3">
-          <div className="flex items-center gap-2 text-xs font-bold text-neutral-900">
-            <History className="w-4 h-4 text-neutral-400" />
-            <span>Recent Stock Activity Audit</span>
-          </div>
-          <div className="border border-neutral-200 rounded-md divide-y divide-neutral-100 text-xs">
-            {movements.slice(0, 5).map((m) => (
-              <div key={m.id} className="p-2.5 flex items-center justify-between">
-                <div>
-                  <span className="font-semibold text-neutral-900">{m.ingredientName}</span>
-                  <span className="text-neutral-400 mx-1.5">·</span>
-                  <span className={m.delta > 0 ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold'}>
+      {/* Recent movements */}
+      <Panel>
+        <div className="border-b border-stone-300 px-4 py-3">
+          <h2 className="text-[15px] font-semibold text-brown-900">Recent stock activity</h2>
+        </div>
+        {movements.length === 0 ? (
+          <EmptyState title="No stock activity yet" hint="Receipts and waste you record show up here." />
+        ) : (
+          <ul className="divide-y divide-stone-300 text-[13px]">
+            {movements.slice(0, 8).map((m) => (
+              <li key={m.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                <div className="flex min-w-0 items-center gap-2">
+                  <StatusBadge status={m.type} />
+                  <span className="truncate font-semibold text-brown-900">{m.ingredientName}</span>
+                  <span className={m.delta > 0 ? 'font-semibold text-status-ready' : 'font-semibold text-status-danger'}>
                     {m.delta > 0 ? `+${m.delta}` : m.delta}
                   </span>
-                  <span className="text-neutral-400 mx-1.5">·</span>
-                  <span className="text-neutral-600">{m.reason}</span>
+                  <span className="truncate text-stone-700">{m.reason}</span>
                 </div>
-                <div className="text-right text-[11px] text-neutral-500 font-mono">
+                <div className="shrink-0 text-right text-[12px] text-stone-500">
                   <span>{new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                  <span className="ml-2">Bal: {m.resultingStock}</span>
+                  <span className="ml-2">Balance {m.resultingStock}</span>
                 </div>
-              </div>
+              </li>
             ))}
-          </div>
-        </div>
-      )}
+          </ul>
+        )}
+      </Panel>
 
-      {/* Adjust Modal */}
+      {/* Adjust modal */}
       {selectedIngredient && (
         <Dialog open={!!selectedIngredient} onOpenChange={(open) => !open && setSelectedIngredient(null)}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>
-                {adjustMode === 'in' ? 'Receive Supply Shipment' : 'Record Kitchen Waste / Spoilage'}
-              </DialogTitle>
+              <DialogTitle>{adjustMode === 'in' ? 'Receive stock' : 'Record waste'}</DialogTitle>
               <DialogDescription>
-                {selectedIngredient.name} (Current: {selectedIngredient.stock} {selectedIngredient.unit})
+                {selectedIngredient.name}, {selectedIngredient.stock} {selectedIngredient.unit} on hand
               </DialogDescription>
             </DialogHeader>
 
             <form onSubmit={handleConfirmAdjust} className="space-y-4">
               <div>
                 <Label htmlFor="adj-qty" className="block mb-1">
-                  Quantity to {adjustMode === 'in' ? 'Add' : 'Deduct'} ({selectedIngredient.unit})
+                  Quantity to {adjustMode === 'in' ? 'add' : 'deduct'} ({selectedIngredient.unit})
                 </Label>
                 <Input
                   id="adj-qty"
@@ -305,19 +269,19 @@ export const StoreInventoryView: React.FC<StoreInventoryViewProps> = ({
                   min="0.1"
                   value={adjustQty}
                   onChange={(e) => setAdjustQty(parseFloat(e.target.value) || 0)}
-                  className="font-mono tabular-nums text-base"
+                  className="text-base"
                   required
                 />
               </div>
 
               <div>
-                <Label htmlFor="adj-reason" className="block mb-1">Reason / Note</Label>
+                <Label htmlFor="adj-reason" className="block mb-1">Reason</Label>
                 <Input
                   id="adj-reason"
                   type="text"
                   value={adjustReason}
                   onChange={(e) => setAdjustReason(e.target.value)}
-                  placeholder="e.g. Weekly delivery, spilled milk tea, damaged buns"
+                  placeholder="Weekly delivery, spilled milk tea, damaged buns"
                   required
                 />
               </div>
@@ -326,12 +290,8 @@ export const StoreInventoryView: React.FC<StoreInventoryViewProps> = ({
                 <Button type="button" variant="outline" size="sm" onClick={() => setSelectedIngredient(null)}>
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  size="sm"
-                  className={adjustMode === 'in' ? 'bg-emerald-700 hover:bg-emerald-800 text-white' : 'bg-rose-700 hover:bg-rose-800 text-white'}
-                >
-                  Confirm {adjustMode === 'in' ? 'Stock Check-in' : 'Waste Deduction'}
+                <Button type="submit" size="sm" variant={adjustMode === 'in' ? 'default' : 'destructive'}>
+                  {adjustMode === 'in' ? 'Add stock' : 'Record waste'}
                 </Button>
               </DialogFooter>
             </form>
@@ -339,20 +299,20 @@ export const StoreInventoryView: React.FC<StoreInventoryViewProps> = ({
         </Dialog>
       )}
 
-      {/* Add New Supply Modal */}
+      {/* Add item modal */}
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Register New Supply Ingredient</DialogTitle>
-            <DialogDescription>Add a new raw material or packaging item to track.</DialogDescription>
+            <DialogTitle>Add stock item</DialogTitle>
+            <DialogDescription>Track a new ingredient or packaging item.</DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleCreateIngredient} className="space-y-3">
             <div>
-              <Label className="block mb-1">Item Name</Label>
+              <Label className="block mb-1">Item name</Label>
               <Input
                 type="text"
-                placeholder="e.g. Nori Seaweed Sheets (Pack of 50)"
+                placeholder="Nori seaweed sheets (pack of 50)"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 required
@@ -364,8 +324,8 @@ export const StoreInventoryView: React.FC<StoreInventoryViewProps> = ({
                 <Label className="block mb-1">Category</Label>
                 <select
                   value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value as any)}
-                  className="w-full h-9 px-2 text-xs border border-neutral-300 rounded bg-white"
+                  onChange={(e) => setNewCategory(e.target.value as typeof newCategory)}
+                  className="h-9 w-full rounded-control border border-stone-300 bg-white px-2 text-[13px]"
                 >
                   <option value="Tea & Boba">Tea & Boba</option>
                   <option value="Dairy & Syrups">Dairy & Syrups</option>
@@ -376,7 +336,7 @@ export const StoreInventoryView: React.FC<StoreInventoryViewProps> = ({
               </div>
 
               <div>
-                <Label className="block mb-1">Unit of Measure</Label>
+                <Label className="block mb-1">Unit</Label>
                 <Input
                   type="text"
                   placeholder="kg, packs, buns, cups"
@@ -389,7 +349,7 @@ export const StoreInventoryView: React.FC<StoreInventoryViewProps> = ({
 
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <Label className="block mb-1">Initial Stock</Label>
+                <Label className="block mb-1">Starting stock</Label>
                 <Input
                   type="number"
                   step="0.1"
@@ -399,7 +359,7 @@ export const StoreInventoryView: React.FC<StoreInventoryViewProps> = ({
                 />
               </div>
               <div>
-                <Label className="block mb-1">Reorder Point</Label>
+                <Label className="block mb-1">Reorder at</Label>
                 <Input
                   type="number"
                   step="0.1"
@@ -409,7 +369,7 @@ export const StoreInventoryView: React.FC<StoreInventoryViewProps> = ({
                 />
               </div>
               <div>
-                <Label className="block mb-1">Unit Cost (₱)</Label>
+                <Label className="block mb-1">Unit cost (₱)</Label>
                 <Input
                   type="number"
                   step="0.1"
@@ -421,10 +381,10 @@ export const StoreInventoryView: React.FC<StoreInventoryViewProps> = ({
             </div>
 
             <div>
-              <Label className="block mb-1">Supplier / Vendor</Label>
+              <Label className="block mb-1">Supplier</Label>
               <Input
                 type="text"
-                placeholder="e.g. Diffun Market Supplies"
+                placeholder="e.g. Malabon Market"
                 value={newSupplier}
                 onChange={(e) => setNewSupplier(e.target.value)}
               />
@@ -434,8 +394,8 @@ export const StoreInventoryView: React.FC<StoreInventoryViewProps> = ({
               <Button type="button" variant="outline" size="sm" onClick={() => setIsAddModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" size="sm" className="bg-amber-800 hover:bg-amber-900 text-white">
-                Save Ingredient
+              <Button type="submit" size="sm">
+                Add item
               </Button>
             </DialogFooter>
           </form>
